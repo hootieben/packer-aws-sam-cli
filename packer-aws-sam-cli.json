@@ -1,0 +1,48 @@
+{
+  "variables": {
+    "version": "1.0.{{timestamp}}"
+  },
+  "builders": [
+    {
+      "type": "vagrant",
+      "communicator": "ssh",
+      "source_path": "ubuntu/focal64",
+      "provider": "virtualbox"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/setup.sh"
+    },
+    {
+      "type": "shell",
+      "execute_command": "{{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/ansible.sh"
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "ansible/main.yml"
+    },
+    {
+      "type": "shell",
+      "execute_command": "{{.Vars}} bash '{{.Path}}'",
+      "script": "scripts/homebrew.sh"
+    },
+    {
+      "type": "shell",
+      "execute_command": "{{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/cleanup.sh"
+    }
+  ],
+  "post-processors": [
+    [
+      {
+        "type": "vagrant-cloud",
+        "box_tag": "hootieben/aws-sam-cli",
+        "version": "{{user `version`}}"
+      }
+    ]
+  ]
+}

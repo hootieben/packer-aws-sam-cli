@@ -1,0 +1,29 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: yes
+  vars:
+    golangver: 1.14.3
+
+  tasks:
+    - name: install dependencies
+      apt:
+        name: "{{ item }}"
+        state: latest
+        install_recommends: yes
+      loop:
+        - git
+        - docker.io
+        - gcc
+
+    - name: Install Go
+      unarchive:
+        src: "https://dl.google.com/go/go{{ golangver }}.linux-amd64.tar.gz"
+        dest: /usr/local
+        remote_src: true
+
+    - name: modify vagrant group membership
+      user:
+        name: vagrant
+        append: true
+        groups: docker
